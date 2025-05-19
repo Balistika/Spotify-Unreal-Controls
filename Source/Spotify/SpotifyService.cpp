@@ -53,8 +53,34 @@ void USpotifyService::BeginAuthorization()
 		.Replace(TEXT(" "), TEXT(""));
 	Challenge.RemoveFromEnd("=");
 	
-	UKismetSystemLibrary::LaunchURL(FString::Printf(TEXT("https://accounts.spotify.com/authorize?response_type=code&client_id=%s&redirect_uri=%s&scope=user-modify-playback-state,user-read-playback-state,user-read-currently-playing&code_challenge=%s&code_challenge_method=S256"),
-		*ClientKey, *RedirectURL, *Challenge));
+	//UKismetSystemLibrary::LaunchURL(FString::Printf(TEXT("https://accounts.spotify.com/authorize?response_type=code&client_id=%s&redirect_uri=%s&scope=user-modify-playback-state,user-read-playback-state,user-read-currently-playing&code_challenge=%s&code_challenge_method=S256"),
+	//	*ClientKey, *RedirectURL, *Challenge));
+	
+	FString Scopes = TEXT(
+		"user-read-private "
+		"user-read-playback-state "
+		"user-read-currently-playing "
+		"user-modify-playback-state"
+	);
+    
+    FString EncodedScopes = FGenericPlatformHttp::UrlEncode(Scopes);
+    
+    FString AuthURL = FString::Printf(
+        TEXT("https://accounts.spotify.com/authorize"
+             "?response_type=code"
+             "&client_id=%s"
+             "&redirect_uri=%s"
+             "&scope=%s"
+             "&code_challenge=%s"
+             "&code_challenge_method=S256"),
+        *ClientKey,
+        *RedirectURL,
+        *EncodedScopes,
+        *Challenge
+    );
+    
+    UKismetSystemLibrary::LaunchURL(AuthURL);
+
 	
 	ServerSocket = CreateServerSocket();
 
